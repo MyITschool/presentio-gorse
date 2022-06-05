@@ -1,0 +1,21 @@
+FROM zhenghaoz/gorse-master as master
+FROM zhenghaoz/gorse-worker as worker
+FROM zhenghaoz/gorse-server as server
+
+FROM redis
+
+COPY --from=master /usr/bin/gorse-master /usr/bin/gorse-master
+COPY --from=worker /usr/bin/gorse-worker /usr/bin/gorse-worker
+COPY --from=server /usr/bin/gorse-server /usr/bin/gorse-server
+
+COPY config.toml /etc/gorse/config.toml
+
+COPY start.sh /etc/scripts/start.sh
+
+RUN chmod u+x /etc/scripts/start.sh
+
+RUN apt update && apt upgrade && apt install gettext -y && apt install nginx -y
+
+COPY default /etc/template/default.template
+
+CMD ["/etc/scripts/start.sh"]
